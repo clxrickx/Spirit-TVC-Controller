@@ -5,3 +5,7 @@ The spirit TVC controller architecture consists of a basic nested control loop s
 
 ## Kinematic & Force Transformation Modules:
 Once target pitch and angles/engine torque is determined and calculated, SPIRIT makes use of a direction cosine matrix(DCM) to convert engine torques into individual actuator angles. Then, the implicit gimbal roll constraint angle is calculated as a function of pitch and yaw angles to prevent kinematic errors caused by non-coplanar actuator mounting geometry.
+
+## Control Laws:
+Proportional-derivative control is used by the baseline attitude indicator to regulate pitch and yaw, while an integral gain is added for auto-trim and prevents steady-state errors caused by centre of gravity offsets, thrust asymmetries, mounting misalignment, etc.
+
