@@ -1,8 +1,9 @@
 import bpy
 import csv
 import math
+from mathutils import Vector, Euler, Matrix
 
-CSV_PATH = "C:/path/to/your/flight.csv" 
+CSV_PATH = "/Users/christophercyhui/Documents/engineering/test3.csv" 
 FPS = 30
 SCALE = 1.0
 print("\n--- STARTING OPENROCKET IMPORT ---")
@@ -70,23 +71,25 @@ else:
                 azimuth = float(clean_row[azimuth_col]) if azimuth_col else 0.0
             except (ValueError, KeyError):
                 continue
-
+            
+            # FIX 1: Set base start time on first valid row
             if first_time is None:
                 first_time = time_val
 
-            # Coordinate transformation (Z=Up, X=East, Y=North)
             frame = int((time_val - first_time) * FPS) + 1
-            
-            pitch_rad = math.radians(zenith)
-            yaw_rad = math.radians(-azimuth)
 
-            rot_x = pitch_rad * math.cos(math.radians(azimuth))
-            rot_y = -pitch_rad * math.sin(math.radians(azimuth))
-            rot_z = yaw_rad
+            # FIX 2: Convert angles to radians
+            pitch_rad = math.radians(zenith)    # 0° = vertical up
+            azimuth_rad = math.radians(azimuth) # 0° = North (+Y), 90° = East (+X)
 
+            # Construct Euler rotation directly (Z-X-Y order)
+            rocket_euler = Euler((pitch_rad, 0.0, -azimuth_rad), 'ZXY')
+
+            # Apply location and explicit Euler rotation
             rocket_obj.location = (east, north, alt)
-            rocket_obj.rotation_euler = (rot_x, rot_y, rot_z)
+            rocket_obj.rotation_euler = rocket_euler
 
+            # Insert keyframes
             rocket_obj.keyframe_insert(data_path="location", frame=frame)
             rocket_obj.keyframe_insert(data_path="rotation_euler", frame=frame)
 
