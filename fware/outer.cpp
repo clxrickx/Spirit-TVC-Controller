@@ -49,7 +49,15 @@ float computeAttitudeError(float ref, float current) {
 
 
 
-// pid core algorithm for a single axis
+/**
+ * @brief PID core algorithm for a single axis.
+ * 
+ * @param error The current tracking error (setpoint - actual).
+ * @param dt Time step in seconds since last update.
+ * @param cfg Reference to the PID configuration parameters.
+ * @param state Reference to the loop state (integral and previous error).
+ * @return The computed rate command for the axis (clamped to limits).
+ */
 float stepSingleAxis(float error, float dt, const OuterLoopConfig& cfg, LoopState& state) {
     // 1. Proportional Term
     float p_out = cfg.kp * error;
@@ -61,7 +69,10 @@ float stepSingleAxis(float error, float dt, const OuterLoopConfig& cfg, LoopStat
     float i_out = cfg.ki * state.error_integral;
 
     // 3. Derivative Term (Derivative of Error)
-    float d_error = (error - state.prev_error) / dt;
+    float d_error = 0.0f;
+    if (dt != 0.0f) {
+        d_error = (error - state.prev_error) / dt;
+    }
     float d_out = cfg.kd * d_error;
     state.prev_error = error;
 
